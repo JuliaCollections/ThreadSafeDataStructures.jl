@@ -1,5 +1,14 @@
 using ThreadSafeDataStructures
 using Test
 
-# write your own tests here
-@test 1 == 2
+const testfiles = [
+    "test_coarselocking.jl",
+]
+
+
+
+for testfile in testfiles
+    @testset "$testfile" begin
+        include(testfile)
+    end
+end

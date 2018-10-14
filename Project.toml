@@ -1,9 +1,11 @@
-authors = ["oxinabox <oxinabox@ucc.asn.au>"]
 name = "ThreadSafeDataStructures"
 uuid = "da0adaa0-cf5e-11e8-2524-abdb76c5aa85"
+authors = ["oxinabox <oxinabox@ucc.asn.au>"]
 version = "0.1.0"
 
 [deps]
+MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 
 [compat]
 julia = "1.0"

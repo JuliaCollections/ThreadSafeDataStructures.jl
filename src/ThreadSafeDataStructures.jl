@@ -1,5 +1,12 @@
 module ThreadSafeDataStructures
+using MacroTools
+using Base.Threads
 
-greet() = print("Hello World!")
+export TS_Array#, TS_Vector, TS_Matrix
+
+include("traits.jl")
+
+include("coarselocking.jl")
+
 
 end # module
