@@ -16,11 +16,11 @@ end
 function declare_unthreadsafe(funcname, sigargs, args)
     call = Expr(:call, 
                 funcname, 
-                replace(args, :datasruct => :(datastruct.backing)...)
+                replace(args, :datasruct => :(datastruct.backing))...
             )
 
 
-    unsafe_funcname = Symbol(:unthreadsafe_, funcname)
+    unsafe_funcname = Symbol(funcname, :_unthreadsafe)
 
     unsafe_funcname, quote
         function $unsafe_funcname($(sigargs...))
@@ -47,7 +47,7 @@ macro locking_delegate(expr)
             try 
                 # `try-finally` is faster than `lock(...) do` because sometimes optimiser fails
                 lock(datastruct.lock)
-                $unsafe_funcname(($args...))
+                $(Expr(:call, unsafe_funcname, args...))
             finally
                 unlock(datastruct.lock)
             end
