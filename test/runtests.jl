@@ -1,6 +1,6 @@
 using ThreadSafeDataStructures
 using Test
-using Threads
+using Base.Threads
 @show nthreads()
 
 const testfiles = [
