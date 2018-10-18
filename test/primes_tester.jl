@@ -36,13 +36,12 @@ Storing them in an vector of the type specified.
 That store must be threadsafe.
 """
 function primes_threaded(n, ::Type{T}) where T<:AbstractVector
-    prime_added = Condition()
+    prime_added = TS_Condition()
     known_primes = T()
-    push!(known_primes, 2)  
+    push!(known_primes, 2)
     
     function ith_prime(ii) # try and read the ith prime, if it is available. If not theen wait til it is
         while(length(known_primes) < ii)
-            #@info "Waiting" threadid=threadid() ii next_check
             wait(prime_added)
         end
         @inbounds known_primes[ii]
@@ -57,7 +56,7 @@ function primes_threaded(n, ::Type{T}) where T<:AbstractVector
     next_check = Atomic{Int}(3) # This is the (potentially prime) number the next thread that asked for something to check will et
     everythread() do
         while(true)
-            x=atomic_add!(next_check, 2) #atomic_add! returns the *old* value befoe the addition
+            x=atomic_add!(next_check, 1) #atomic_add! returns the *old* value befoe the addition
             for ii in 1:x # Not going to get up to this but it will be fine (except at x=2, got to watch that, good thing we already have 2 covered)
                 p = ith_prime(ii) 
                 if p > sqrt(x)
@@ -101,7 +100,7 @@ function primes_array(n)
                 break
             end
         end
-        x+=2
+        x+=1
         length(known_primes) == n && break
     end
     return known_primes
@@ -111,7 +110,7 @@ end
 ##################
 
 using ThreadSafeDataStructures
-
+@show nthreads()
 @time primes_threaded(10_000, TS_Vector{Int});
 @time primes_threaded(10_000, TS_Vector{Int});
 @time primes_threaded(10_000, TS_Vector{Int});
