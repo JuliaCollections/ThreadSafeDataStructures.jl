@@ -28,6 +28,7 @@ function push_sorted!(xs, y)
 end
 
 
+
 """
     primes_threaded(n, store_type)
 
@@ -36,20 +37,22 @@ Storing them in an vector of the type specified.
 That store must be threadsafe.
 """
 function primes_threaded(n, ::Type{T}) where T<:AbstractVector
-    prime_added = TS_Condition()
+    #prime_added = TS_Condition()
     known_primes = T()
     push!(known_primes, 2)
     
     function ith_prime(ii) # try and read the ith prime, if it is available. If not theen wait til it is
         while(length(known_primes) < ii)
-            wait(prime_added)
+            ccall(:jl_cpu_pause, Cvoid, ())
+            
+            #wait(prime_added)
         end
         @inbounds known_primes[ii]
     end
     
     function add_prime!(p) # Add a prime to our list and let anyone why was waiting for it know 
         push_sorted!(known_primes, p)
-        notify(prime_added, all=true)
+        #notify(prime_added, all=true)
     end
 
     # Now the the actual code
@@ -75,7 +78,7 @@ function primes_threaded(n, ::Type{T}) where T<:AbstractVector
             end
         end
     end
-    return known_primes
+    return known_primes[1:n]
 end
 
 """
@@ -110,9 +113,16 @@ end
 ##################
 
 using ThreadSafeDataStructures
-@show nthreads()
-@time primes_threaded(10_000, TS_Vector{Int});
-@time primes_threaded(10_000, TS_Vector{Int});
-@time primes_threaded(10_000, TS_Vector{Int});
-@time primes_threaded(10_000, TS_Vector{Int});
-@time primes_threaded(10_000, TS_Vector{Int});
+using Test
+@testset "TS_Vector Primes" begin
+    
+    @test primes_threaded(10_000, TS_Vector{Int}) == primes_array(10_000);
+    @test primes_threaded(10_000, TS_Vector{Int}) == primes_array(10_000);
+    @test primes_threaded(10_000, TS_Vector{Int}) == primes_array(10_000);
+    sleep(rand())
+    @test primes_threaded(10, TS_Vector{Int}) == primes_array(10);
+    @test primes_threaded(10, TS_Vector{Int}) == primes_array(10);
+    @test primes_threaded(10, TS_Vector{Int}) == primes_array(10);
+    sleep(rand())
+    @test primes_threaded(100, TS_Vector{Int}) == primes_array(100);
+end
